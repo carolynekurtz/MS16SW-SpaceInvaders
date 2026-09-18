@@ -27,7 +27,7 @@ SCREEN_HEIGHT = 600
 DIRECTORY = os.getcwd()
 
 ####     FONTE     ####
-FONT = DIRECTORY + "/fonts/space_invaders.ttf"
+FONT = DIRECTORY + "/assets/fonts/space_invaders.ttf"
 
 
 class Edge(pygame.sprite.Sprite):
@@ -98,8 +98,8 @@ class Ship(pygame.sprite.Sprite):
         # A nave inicia com 3 vidas
         self.lifes = 3
         # Sons que a nave possui quando atira ou quando é atingida
-        self.__sound_shot = pygame.mixer.Sound(DIRECTORY + "/sounds/shoot.wav")
-        self.__ship_explosion = pygame.mixer.Sound(DIRECTORY + "/sounds/shipexplosion.wav")
+        self.__sound_shot = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/shoot.wav")
+        self.__ship_explosion = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/shipexplosion.wav")
 
     def initial_position(self):
         """
@@ -282,7 +282,7 @@ class SpaceInvaders():
         # Coloca uma legenda para a janela
         pygame.display.set_caption("Space Invaders")
         # Coloca um ícone na janela
-        logo = pygame.image.load(DIRECTORY + "/images/logo.png")
+        logo = pygame.image.load(DIRECTORY + "/assets/images/logo.png")
         pygame.display.set_icon(logo)
         self.score = 0
         self.level = 0
@@ -293,19 +293,19 @@ class SpaceInvaders():
         '''
         self.font = self.create_font(60)
         self.score_font = self.create_font(15)
-        self.explosion_sound = pygame.mixer.Sound(DIRECTORY + "/sounds/invaderkilled.wav")
+        self.explosion_sound = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/invaderkilled.wav")
         
         # Carregando imagens necessárias
-        self.path_image_ship = DIRECTORY + "/images/ship.png"
-        background_image = pygame.image.load(DIRECTORY + "/images/back.png")
-        explosion_image = pygame.image.load(DIRECTORY + "/images/explosion.png")
-        lifes_image = pygame.image.load(DIRECTORY + "/images/heart.png")
+        self.path_image_ship = DIRECTORY + "/assets/images/ship.png"
+        background_image = pygame.image.load(DIRECTORY + "/assets/images/back.png")
+        explosion_image = pygame.image.load(DIRECTORY + "/assets/images/explosion.png")
+        lifes_image = pygame.image.load(DIRECTORY + "/assets/images/heart.png")
 
         self.ship = pygame.sprite.GroupSingle(
                                 Ship(self.path_image_ship, (SCREEN_WIDTH - 50) // 2, 
                                         (SCREEN_HEIGHT - 110)))
         self.ship_sprite = self.ship.sprites()[0]
-        mystery_image = pygame.image.load(DIRECTORY + "/images/boss3.png")
+        mystery_image = pygame.image.load(DIRECTORY + "/assets/images/boss3.png")
         self.mystery_image = pygame.transform.scale(mystery_image, [71, 39])
         self.mystery = pygame.sprite.GroupSingle(
                                 Mystery(self.mystery_image, self.random_position(), 15))
@@ -336,7 +336,7 @@ class SpaceInvaders():
         Cria a tela inicial do jogo.
         """
         menu = True
-        music_menu = pygame.mixer.Sound(DIRECTORY + "/sounds/menu.wav")
+        music_menu = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/menu.wav")
         music_menu.play(-1)
 
         text = self.font.render("SPACE INVADERS", True, GREEN)
@@ -346,7 +346,7 @@ class SpaceInvaders():
         command1_rect = command1.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100))
         command2_rect = command2.get_rect(center = ((SCREEN_WIDTH + 15) // 2, SCREEN_HEIGHT - 50))
         
-        mystery = pygame.image.load(DIRECTORY + "/images/boss1.png")
+        mystery = pygame.image.load(DIRECTORY + "/assets/images/boss1.png")
         mystery = pygame.transform.scale(mystery, [110, 60])
         speed = [-5, 5]
         rect_mystery = mystery.get_rect()
@@ -394,7 +394,7 @@ class SpaceInvaders():
         """
         Cria a tela final do jogo.
         """
-        music_menu = pygame.mixer.Sound(DIRECTORY + "/sounds/menu.wav")
+        music_menu = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/menu.wav")
         music_menu.play(-1)
         self.game_over_screen()
 
@@ -525,7 +525,7 @@ class SpaceInvaders():
         enemy_types = []
 
         for i in range(1, 8):
-            enemy_types.append(pygame.image.load(DIRECTORY + ("/images/invader%d.png" % (i % 2))))
+            enemy_types.append(pygame.image.load(DIRECTORY + ("/assets/images/invader%d.png" % (i % 2))))
 
         x = 25
 

@@ -1,6 +1,6 @@
 # SPACE INVADERS 🛸
 
-[![Language](https://img.shields.io/badge/python-%3E=%202.7-blue?style=flat-square&logo=appveyor)](https://www.python.org)
+[![Language](https://img.shields.io/badge/python-3.12-blue?style=flat-square&logo=python)](https://www.python.org/)
 [![Modules](https://img.shields.io/badge/modules-pygame-green?style=flat-square&logo=appveyor)](https://www.pygame.org/docs/)
 
 **ALIENS ESTÃO INVADINDO A TERRA!**
@@ -15,14 +15,17 @@ O objetivo do jogo é destruir os aliens com a sua nave e dessa forma impedir qu
 ## Tópicos
 
 - [SPACE INVADERS 🛸](#space-invaders-%f0%9f%9b%b8)
-  - [Tópicos](#t%c3%b3picos)
+  - [Tópicos](#topicos)
     - [Eventos Essenciais em um jogo](#eventos-essenciais-em-um-jogo)
     - [Pygame](#pygame)
     - [Instalando o Pygame](#instalando-o-pygame)
     - [Executando o jogo](#executando-o-jogo)
-    - [Detalhes da Construção do Jogo](#detalhes-da-constru%c3%a7%c3%a3o-do-jogo)
+    - [Estrutura do projeto](#estrutura-do-projeto)
+    - [Detalhes da Construção do Jogo](#detalhes-da-construcao-do-jogo)
     - [Comandos](#comandos)
-    - [Links Úteis](#links-%c3%9ateis)
+    - [Solução de problemas](#solução-de-problemas)
+    - [Links Úteis](#links-uteis)
+    - [Resposáveis pela manutenção](#responsaveis-pela-manutenção)
     - [Autores](#autores)
 
 ### Eventos Essenciais em um jogo
@@ -73,43 +76,65 @@ FONTE: [LINK](http://www.labtime.ufg.br/cgames/pdf/CProgPy_Pygame.pdf)
 
 ### Instalando o Pygame
 
-Inicialmente é necessário ter o Python instalado e o pip. Caso não tenha um dos dois instalados siga o passo a passo visto [aqui para Linux](https://python.org.br/instalacao-linux/) ou [aqui para Windows](https://python.org.br/instalacao-windows/) **e não se esqueça de adicionar Python na variável de ambiente!**.
+Para executar o jogo, é necessário ter o Python instalado.
 
-1. Para iniciar a instalação do Pygame, é recomendável estar com o pip atualizado, para isso faça _(esse passo pode ser pulado se você acabou de instalá-lo)_:
+Recomenda-se utilizar o Python 3.12. A versão utilizada no desenvolvimento e nos testes deste projeto foi o Python 3.12.10.
 
+Para verificar se o Python está instalado, execute no terminal:
+
+```bash
+py -3.12 --version
 ```
-$ pip install --user --upgrade pip 
+Caso o Python não esteja instalado, ele pode ser obtido através do site oficial:
+
+https://www.python.org/downloads/
+
+Após instalar o Python, instale o Pygame utilizando o comando:
+
+```bash
+py -3.12 -m pip install pygame
 ```
 
-2. Instalando Pygame:
+Para verificar se o Pygame foi instalado corretamente:
 
+```bash
+py -3.12 -m pygame --version
 ```
-$ pip install --user pygame
-```
+
+A versão utilizada nos testes deste projeto foi o Pygame 2.6.1.
 
 ### Executando o jogo
 
-Qualquer um pode baixar o código do jogo e executar clicando no botão verde **Clone or download** e pode baixar o código clicando [**aqui**](https://github.com/HigorSnt/SpaceInvaders/archive/master.zip) ou digitando no terminal o comando:
+Para obter o projeto, clone o repositório utilizando o comando:
 
-```
-$ git clone https://github.com/HigorSnt/SpaceInvaders.git
-```
-
-> Se optar pela primeira opção lembre-se de extrair!
-
-Em seguida, entre na pasta do jogo utilizando o terminal:
-
-```
-$ cd SpaceInvaders
+```bash
+git clone https://github.com/carolynekurtz/MS16SW-SpaceInvaders.git
 ```
 
-Por fim, faça o seguinte comando:
+Em seguida, entre na pasta do projeto:
 
-```
-$ python spaceinvaders.py
+```bash
+cd MS16SW-SpaceInvaders
 ```
 
-Em seguida deverá abrir a janela do jogo 😁.
+Com o Python e o Pygame instalados, execute o jogo com:
+
+```bash
+py -3.12 spaceinvaders.py
+```
+
+Após a execução do comando, a janela do jogo deverá ser aberta.
+
+Os recursos utilizados pelo jogo estão organizados dentro da pasta `assets`, separados de acordo com seu tipo:
+
+```text
+assets/
+├── fonts/
+├── images/
+└── sounds/
+```
+
+A pasta images contém os elementos gráficos utilizados no jogo, sounds contém os arquivos de áudio e fonts contém as fontes utilizadas na interface.
 
 ### Detalhes da Construção do Jogo
 
@@ -173,6 +198,39 @@ Para realizar comandos no jogo é necessário apenas o uso teclado e a sua lista
   </tr>
 </table>
 
+### Solução de problemas
+
+**Pygame não encontrado**
+
+Caso apareça uma mensagem informando que o módulo `pygame` não foi encontrado, instale o Pygame utilizando:
+
+```bash
+py -3.12 -m pip install pygame
+```
+
+Python não encontrado
+
+Verifique se o Python 3.12 está instalado executando:
+
+```
+py -3.12 --version
+```
+
+Caso o comando não seja reconhecido, instale o Python através do site oficial:
+
+https://www.python.org/downloads/
+
+Erro ao carregar imagens, sons ou fontes
+
+Verifique se a pasta assets está presente na raiz do projeto e se suas subpastas estão organizadas da seguinte maneira:
+
+assets/
+├── fonts/
+├── images/
+└── sounds/
+
+Também verifique se os arquivos necessários estão presentes dentro de suas respectivas pastas.
+
 ### Links Úteis
 
 * [Apresentação feita em sala de aula](https://bit.ly/2XuTkxo)
@@ -185,8 +243,16 @@ Para realizar comandos no jogo é necessário apenas o uso teclado e a sua lista
     * [Material da UNESP - Campus de Ilha Solteira](https://www.dcc.ufrj.br/~fabiom/mab225/pythonoo.pdf)
  * Qual cor usar? [Acesse aqui!](http://www.erikasarti.com/html/tabela-cores/)
   
-  
+  ### Responsáveis pela manutenção
 
+As alterações e melhorias realizadas neste repositório foram desenvolvidas pelos integrantes do grupo como parte da atividade de manutenção de software.
+
+Integrantes:
+
+- Carolyne Kurtz
+- Leonardo Paniz
+- Samuel Vithor Oliveira Martins 
+- Vitoria Seibt
 
 ### Autores
 
