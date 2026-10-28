@@ -678,6 +678,24 @@ class SpaceInvaders():
     def create_font(self, size):
         return pygame.font.Font(FONT, size)
 
+    def can_shoot(self, event):
+        """
+        Indica se a nave pode atirar: o jogador apertou uma tecla de disparo
+        (seta para cima ou espaço) e não há outro tiro da nave na tela.
+
+        Refatoração aplicada: Decompose Conditional. A condição que ficava
+        em uma linha só dentro de main foi extraída para este método, para
+        que a regra de disparo tenha um nome e um lugar próprio.
+        """
+        pressed_shoot_key = event.key == pygame.K_UP or event.key == pygame.K_SPACE
+        return pressed_shoot_key and not self.ship_shot
+
+    def fire_ship_shot(self):
+        """
+        Cria o disparo da nave e o adiciona ao grupo de tiros.
+        """
+        self.ship_shot.add(self.ship_sprite.shoot())
+        
     def main(self):
         """
         Método principal do jogo.
