@@ -368,7 +368,12 @@ class SpaceInvaders():
             rect_mystery.y += speed[1]
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                # Refatoração aplicada: Consolidate Conditional Expression.
+                # Fechar a janela e apertar ESC levam ao mesmo resultado, então
+                # os dois testes foram unidos em uma só condição.
+                wants_to_quit = (event.type == pygame.QUIT or
+                                 (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE))
+                if wants_to_quit:
                     music_menu.stop()
                     return False
 
@@ -377,10 +382,6 @@ class SpaceInvaders():
                         self.start_game()
                         music_menu.stop()
                         return True
-
-                    if event.key == pygame.K_ESCAPE:
-                        music_menu.stop()
-                        return False
 
             self.window.fill(BLACK)
             self.window.blit(mystery, rect_mystery)
@@ -437,7 +438,36 @@ class SpaceInvaders():
                         music_menu.stop()
                         pygame.quit()
                         exit()
-        
+
+    def show_message_screen(self, message, color, duration_ms, x_offset):
+        """
+        Exibe uma mensagem centralizada na tela por um tempo determinado.
+
+        Refatoração aplicada: Extract Method. O laço de exibição era idêntico
+        em level_screen e game_over_screen (mudavam só o texto, a cor, a
+        duração e a posição) e foi extraído para este método. Qualquer
+        ajuste nessas telas deve ser feito aqui, em um só lugar.
+
+        Parâmetros:
+            message: texto exibido.
+            color: cor do texto.
+            duration_ms: duração da tela, em milissegundos.
+            x_offset: valor usado para centralizar o texto na horizontal.
+        """
+        font = self.create_font(100)
+        text = font.render(message, True, color)
+        start = pygame.time.get_ticks()
+
+        while ((pygame.time.get_ticks() - start) < duration_ms):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            self.window.blit(self.background, [0, 0])
+            self.window.blit(text, [(SCREEN_WIDTH - x_offset) // 2, 220])
+            pygame.display.update()
+
     def level_screen(self):
         """
         Cria a tela que indica o nível que irá iniciar.
@@ -448,40 +478,18 @@ class SpaceInvaders():
             self.speed += 0.3
         elif (self.level == 1):
             self.speed += 1
-        
-        font = self.create_font(100)
-        text = font.render('LEVEL: ' + str(self.level), True, GOLD)
+
+        # self.time marca o início do nível e é usado em update_direction.
         self.time = pygame.time.get_ticks()
+        self.show_message_screen('LEVEL: ' + str(self.level), GOLD, 1000, 450)
 
-        while ((pygame.time.get_ticks() - self.time) < 1000):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-
-            self.window.blit(self.background, [0, 0])
-            self.window.blit(text, [(SCREEN_WIDTH - 450) // 2, 220])
-            pygame.display.update()
-    
     def game_over_screen(self):
         """
         Cria a tela de game over.
         Ela dura 1.5 segundo (1500 milisegundos).
         """
-        font = self.create_font(100)
-        text = font.render('GAME OVER', True, RED)
-        time = pygame.time.get_ticks()
-
-        while ((pygame.time.get_ticks() - time) < 1500):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-
-            self.window.blit(self.background, [0, 0])
-            self.window.blit(text, [(SCREEN_WIDTH - 600) // 2, 220])
-            pygame.display.update()
-
+        self.show_message_screen('GAME OVER', RED, 1500, 600)
+        
     def start_game(self):
         """
         Limpa todas as variáveis para que se possa iniciar o jogo.
@@ -646,12 +654,16 @@ class SpaceInvaders():
         arr = self.invaders.sprites()
         first = arr[0]
         last = arr[-1]
-        
-        if ((last.rect.x > (SCREEN_WIDTH - last.rect.width - 10)) or (first.rect.x < 10)):
-            self.invaders_direction *= -1
-            current_time = pygame.time.get_ticks()
-            if (current_time - self.time > (8000 // self.speed)):
-                self.down_invader(arr)
+
+        # Refatoração aplicada: Replace Nested Conditional with Guard Clauses.
+        # Cláusula de guarda: se nenhum invasor chegou à borda, não há nada a fazer.
+        if not ((last.rect.x > (SCREEN_WIDTH - last.rect.width - 10)) or (first.rect.x < 10)):
+            return
+
+        self.invaders_direction *= -1
+        current_time = pygame.time.get_ticks()
+        if (current_time - self.time > (8000 // self.speed)):
+            self.down_invader(arr)
     
     def down_invader(self, arr):
         """
@@ -667,6 +679,24 @@ class SpaceInvaders():
     def create_font(self, size):
         return pygame.font.Font(FONT, size)
 
+    def can_shoot(self, event):
+        """
+        Indica se a nave pode atirar: o jogador apertou uma tecla de disparo
+        (seta para cima ou espaço) e não há outro tiro da nave na tela.
+
+        Refatoração aplicada: Decompose Conditional. A condição que ficava
+        em uma linha só dentro de main foi extraída para este método, para
+        que a regra de disparo tenha um nome e um lugar próprio.
+        """
+        pressed_shoot_key = event.key == pygame.K_UP or event.key == pygame.K_SPACE
+        return pressed_shoot_key and not self.ship_shot
+
+    def fire_ship_shot(self):
+        """
+        Cria o disparo da nave e o adiciona ao grupo de tiros.
+        """
+        self.ship_shot.add(self.ship_sprite.shoot())
+        
     def main(self):
         """
         Método principal do jogo.
