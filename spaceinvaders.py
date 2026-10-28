@@ -653,12 +653,16 @@ class SpaceInvaders():
         arr = self.invaders.sprites()
         first = arr[0]
         last = arr[-1]
-        
-        if ((last.rect.x > (SCREEN_WIDTH - last.rect.width - 10)) or (first.rect.x < 10)):
-            self.invaders_direction *= -1
-            current_time = pygame.time.get_ticks()
-            if (current_time - self.time > (8000 // self.speed)):
-                self.down_invader(arr)
+
+        # Refatoração aplicada: Replace Nested Conditional with Guard Clauses.
+        # Cláusula de guarda: se nenhum invasor chegou à borda, não há nada a fazer.
+        if not ((last.rect.x > (SCREEN_WIDTH - last.rect.width - 10)) or (first.rect.x < 10)):
+            return
+
+        self.invaders_direction *= -1
+        current_time = pygame.time.get_ticks()
+        if (current_time - self.time > (8000 // self.speed)):
+            self.down_invader(arr)
     
     def down_invader(self, arr):
         """
