@@ -368,7 +368,12 @@ class SpaceInvaders():
             rect_mystery.y += speed[1]
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                # Refatoração aplicada: Consolidate Conditional Expression.
+                # Fechar a janela e apertar ESC levam ao mesmo resultado, então
+                # os dois testes foram unidos em uma só condição.
+                wants_to_quit = (event.type == pygame.QUIT or
+                                 (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE))
+                if wants_to_quit:
                     music_menu.stop()
                     return False
 
@@ -377,10 +382,6 @@ class SpaceInvaders():
                         self.start_game()
                         music_menu.stop()
                         return True
-
-                    if event.key == pygame.K_ESCAPE:
-                        music_menu.stop()
-                        return False
 
             self.window.fill(BLACK)
             self.window.blit(mystery, rect_mystery)
