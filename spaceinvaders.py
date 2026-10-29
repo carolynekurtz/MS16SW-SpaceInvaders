@@ -314,6 +314,14 @@ class SpaceInvaders():
         self.explosion_image = pygame.transform.scale(explosion_image, (
                                     (SCREEN_WIDTH // 20), (SCREEN_WIDTH // 20)))
         self.clock = pygame.time.Clock()
+        # Pausa (SM-13)
+        self.paused = False
+        self.pause_start = 0
+        self.pause_font = self.create_font(60)
+        self.pause_icon = pygame.image.load(DIRECTORY + "/images/pause.png")
+        self.play_icon = pygame.image.load(DIRECTORY + "/images/play.png")
+        self.pause_button_rect = self.pause_icon.get_rect(
+            topleft=(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 34))
         self.invaders = pygame.sprite.OrderedUpdates()
         self.invaders_direction = 1
         self.increment_speed = False
@@ -589,6 +597,7 @@ class SpaceInvaders():
         self.update_direction()
         self.check_collisions()
         self.showShipLives()
+        self.draw_pause_button()
 
         self.groups = pygame.sprite.Group(self.ship, self.ship_shot, self.invader_shot, self.invaders, 
                                     self.left_edge, self.bottom_edge, self.right_edge, self.mystery)
@@ -696,7 +705,42 @@ class SpaceInvaders():
         Cria o disparo da nave e o adiciona ao grupo de tiros.
         """
         self.ship_shot.add(self.ship_sprite.shoot())
-        
+    def toggle_pause(self):
+        """
+        Pausa ou retoma o jogo. Ao pausar, guarda o instante da pausa e
+        exibe o aviso PAUSED. Ao retomar, soma o tempo parado a self.time,
+        para que o controle de descida dos invasores (update_direction)
+        não conte o tempo em que o jogo ficou parado.
+        """
+        if self.paused:
+            self.time += pygame.time.get_ticks() - self.pause_start
+            self.paused = False
+        else:
+            self.pause_start = pygame.time.get_ticks()
+            self.paused = True
+            self.show_paused_message()
+        self.draw_pause_button()
+        pygame.display.update()
+
+    def show_paused_message(self):
+        """
+        Desenha o aviso PAUSED no centro da tela, sobre a última imagem do jogo.
+        """
+        text = self.pause_font.render("PAUSED", True, GOLD)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        self.window.blit(text, text_rect)
+
+
+    def draw_pause_button(self):
+        """
+        Desenha o ícone de pausa (ou de continuar, se o jogo está pausado).
+        Antes, restaura o fundo na área do ícone para não sobrepor o desenho anterior.
+        """
+        self.window.blit(self.background, self.pause_button_rect, self.pause_button_rect)
+        icon = self.play_icon if self.paused else self.pause_icon
+        self.window.blit(icon, self.pause_button_rect)
+
+
     def main(self):
         """
         Método principal do jogo.
@@ -728,12 +772,18 @@ class SpaceInvaders():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_ESCAPE:
                                 run, menu = False, False
-                            if self.can_shoot(event):
+                            if event.key == pygame.K_p:
+                                self.toggle_pause()
+                            if self.can_shoot(event) and not self.paused:
                                 self.fire_ship_shot()
+                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                            if self.pause_button_rect.collidepoint(event.pos):
+                                self.toggle_pause()
 
-                    self.update()
-
-
+                    if self.paused:
+                        self.clock.tick(60)
+                    else:
+                        self.update()
 
 
 if __name__ == "__main__":
