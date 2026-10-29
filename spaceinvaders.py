@@ -331,6 +331,9 @@ class SpaceInvaders():
         self.bottom_edge = pygame.sprite.GroupSingle(Edge(SCREEN_WIDTH, 5, 0, 560))
         self.groups = pygame.sprite.Group(self.ship_shot, self.invader_shot, 
                                     self.invaders, self.mystery)
+        
+         # Janela de instruções (SM-15)
+        self.instructions_shown = False
 
     def random_position(self):
         """
@@ -511,6 +514,8 @@ class SpaceInvaders():
         self.mystery.empty()
         self.invader_shot.empty()
         self.ship_shot.empty()
+        if not self.instructions_shown:
+            self.instructions_screen()
         self.level_screen()
         self.create_invaders()
         self.ship_sprite.initial_position()
@@ -705,6 +710,7 @@ class SpaceInvaders():
         Cria o disparo da nave e o adiciona ao grupo de tiros.
         """
         self.ship_shot.add(self.ship_sprite.shoot())
+
     def toggle_pause(self):
         """
         Pausa ou retoma o jogo. Ao pausar, guarda o instante da pausa e
@@ -740,6 +746,54 @@ class SpaceInvaders():
         icon = self.play_icon if self.paused else self.pause_icon
         self.window.blit(icon, self.pause_button_rect)
 
+
+    def instructions_screen(self):
+        """
+        Exibe a janela de instruções com as teclas do jogo.
+        Aparece só na primeira partida e fecha ao clicar no botão CLOSE
+        ou ao apertar ENTER. O jogo não começa enquanto ela está aberta.
+        """
+        title_font = self.create_font(50)
+        text_font = self.create_font(20)
+        lines = ["ARROWS : MOVE", "SPACE OR UP : SHOOT", "P : PAUSE", "ESC : QUIT"]
+
+        panel = pygame.Rect(0, 0, 560, 380)
+        panel.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        button = pygame.Rect(0, 0, 240, 50)
+        button.center = (SCREEN_WIDTH // 2, panel.bottom - 50)
+
+        title = title_font.render("HOW TO PLAY", True, GOLD)
+        button_text = text_font.render("CLOSE : ENTER", True, GREEN)
+
+        opened = True
+        while opened:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    opened = False
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if button.collidepoint(event.pos):
+                        opened = False
+
+            self.window.blit(self.background, [0, 0])
+            pygame.draw.rect(self.window, BLACK, panel)
+            pygame.draw.rect(self.window, WHITE, panel, 3)
+            self.window.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, panel.top + 55)))
+
+            y = panel.top + 130
+            for line in lines:
+                text = text_font.render(line, True, WHITE)
+                self.window.blit(text, text.get_rect(center=(SCREEN_WIDTH // 2, y)))
+                y += 45
+
+            pygame.draw.rect(self.window, GREEN, button, 3)
+            self.window.blit(button_text, button_text.get_rect(center=button.center))
+            self.clock.tick(60)
+            pygame.display.update()
+
+        self.instructions_shown = True
 
     def main(self):
         """
