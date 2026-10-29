@@ -728,8 +728,8 @@ class SpaceInvaders():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_ESCAPE:
                                 run, menu = False, False
-                            if ((event.key == pygame.K_UP or event.key == pygame.K_SPACE) and not self.ship_shot):
-                                self.ship_shot.add(self.ship_sprite.shoot())
+                            if self.can_shoot(event):
+                                self.fire_ship_shot()
 
                     self.update()
 
