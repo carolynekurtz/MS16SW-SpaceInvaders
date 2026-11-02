@@ -20,6 +20,11 @@ SPRINGREEN = (0, 250, 154)
 ####     TELA     ####
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
+BLOCK_ROWS = 4
+BLOCK_COLUMNS = 10
+BLOCK_START_X = 45
+BLOCK_SPACING_X = 300
+BLOCK_START_Y = 400
 
 
 ####     DIRETÓRIO     ####
@@ -219,6 +224,16 @@ class Mystery(pygame.sprite.Sprite):
         self.image = sprite
         self.rect = self.image.get_rect(topleft = (pos_x, pos_y))
         self.speed = speed
+
+    
+    @staticmethod
+    def random_position():
+        """
+        Escolhe aleatoriamente uma posição inicial no eixo x
+        para a nave-mãe.
+        """
+        return choice([-1700, -1900, -2200, -2500, -1500])
+
     
     def update(self, *args):
         if (self.rect.x >= (SCREEN_WIDTH + 200)):
@@ -261,6 +276,77 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 
+class InstructionsScreen:
+    """
+    Responsável por exibir a tela de instruções do jogo.
+    """
+
+    def __init__(self, window, background, clock):
+        self.window = window
+        self.background = background
+        self.clock = clock
+
+    def show(self):
+        title_font = pygame.font.Font(FONT, 50)
+        text_font = pygame.font.Font(FONT, 20)
+        lines = [
+            "ARROWS : MOVE",
+            "SPACE OR UP : SHOOT",
+            "P : PAUSE",
+            "ESC : QUIT"
+        ]
+
+        panel = pygame.Rect(0, 0, 560, 380)
+        panel.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+        button = pygame.Rect(0, 0, 240, 50)
+        button.center = (SCREEN_WIDTH // 2, panel.bottom - 50)
+
+        title = title_font.render("HOW TO PLAY", True, GOLD)
+        button_text = text_font.render("CLOSE : ENTER", True, GREEN)
+
+        opened = True
+        while opened:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    opened = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if button.collidepoint(event.pos):
+                        opened = False
+
+            self.window.blit(self.background, [0, 0])
+            pygame.draw.rect(self.window, BLACK, panel)
+            pygame.draw.rect(self.window, WHITE, panel, 3)
+
+            self.window.blit(
+                title,
+                title.get_rect(center=(SCREEN_WIDTH // 2, panel.top + 55))
+            )
+
+            y = panel.top + 130
+            for line in lines:
+                text = text_font.render(line, True, WHITE)
+                self.window.blit(
+                    text,
+                    text.get_rect(center=(SCREEN_WIDTH // 2, y))
+                )
+                y += 45
+
+            pygame.draw.rect(self.window, GREEN, button, 3)
+            self.window.blit(
+                button_text,
+                button_text.get_rect(center=button.center)
+            )
+
+            self.clock.tick(60)
+            pygame.display.update()
+
+
 class SpaceInvaders():
     """
     Classe que comanda os principais comandos do jogo.
@@ -291,8 +377,8 @@ class SpaceInvaders():
         Criando um objeto do tipo pygame.font.Font, onde é passada a fonte e o tamanho
         se a fonte for passada como None é utilizada a padrão do sistema.
         '''
-        self.font = self.create_font(60)
-        self.score_font = self.create_font(15)
+        self.font = pygame.font.Font(FONT, 60)
+        self.score_font = pygame.font.Font(FONT, 15)
         self.explosion_sound = pygame.mixer.Sound(DIRECTORY + "/sounds/invaderkilled.wav")
         
         # Carregando imagens necessárias
@@ -308,7 +394,7 @@ class SpaceInvaders():
         mystery_image = pygame.image.load(DIRECTORY + "/images/boss3.png")
         self.mystery_image = pygame.transform.scale(mystery_image, [71, 39])
         self.mystery = pygame.sprite.GroupSingle(
-                                Mystery(self.mystery_image, self.random_position(), 15))
+                                Mystery(self.mystery_image, Mystery.random_position(), 15))
         self.background = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
         self.lifes_image = pygame.transform.scale(lifes_image, (25, 25))
         self.explosion_image = pygame.transform.scale(explosion_image, (
@@ -317,7 +403,7 @@ class SpaceInvaders():
         # Pausa (SM-13)
         self.paused = False
         self.pause_start = 0
-        self.pause_font = self.create_font(60)
+        self.pause_font = pygame.font.Font(FONT, 60)
         self.pause_icon = pygame.image.load(DIRECTORY + "/images/pause.png")
         self.play_icon = pygame.image.load(DIRECTORY + "/images/play.png")
         self.pause_button_rect = self.pause_icon.get_rect(
@@ -335,12 +421,12 @@ class SpaceInvaders():
          # Janela de instruções (SM-15)
         self.instructions_shown = False
 
-    def random_position(self):
-        """
-        Escolhe aleatoriamente uma posição inicial no eixo x
-        para a nave-mãe.
-        """
-        return choice([-1700, -1900, -2200, -2500, -1500])
+        self.instructions_view = InstructionsScreen(
+        self.window,
+        self.background,
+        self.clock
+)
+
 
     def home_screen(self):
         """
@@ -351,7 +437,7 @@ class SpaceInvaders():
         music_menu.play(-1)
 
         text = self.font.render("SPACE INVADERS", True, GREEN)
-        self.font = self.create_font(20)
+        self.font = pygame.font.Font(FONT, 20)
         command1 = self.font.render(" ENTER : START ", True, WHITE, None)
         command2 = self.font.render("   ESC : OUT      ", True, WHITE, None)
         command1_rect = command1.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100))
@@ -410,8 +496,8 @@ class SpaceInvaders():
         music_menu.play(-1)
         self.game_over_screen()
 
-        self.font50 = self.create_font(50)
-        self.font20 = self.create_font(20)
+        self.font50 = pygame.font.Font(FONT, 50)
+        self.font20 = pygame.font.Font(FONT, 20)
 
         text1 = self.font50.render("FINAL SCORE: %d" % self.score, True, GOLD)
         text2 = self.font20.render("PRESS ENTER TO TRY AGAIN", True, WHITE)
@@ -465,7 +551,7 @@ class SpaceInvaders():
             duration_ms: duração da tela, em milissegundos.
             x_offset: valor usado para centralizar o texto na horizontal.
         """
-        font = self.create_font(100)
+        font = pygame.font.Font(FONT, 100)
         text = font.render(message, True, color)
         start = pygame.time.get_ticks()
 
@@ -515,7 +601,8 @@ class SpaceInvaders():
         self.invader_shot.empty()
         self.ship_shot.empty()
         if not self.instructions_shown:
-            self.instructions_screen()
+            self.instructions_view.show()
+            self.instructions_shown = True
         self.level_screen()
         self.create_invaders()
         self.ship_sprite.initial_position()
@@ -531,11 +618,11 @@ class SpaceInvaders():
                 que ele será construído.
         """
         aux = pygame.sprite.Group()
-        for row in range(4):
-            for column in range(10):
+        for row in range(BLOCK_ROWS): 
+            for column in range(BLOCK_COLUMNS): 
                 blocker = Block()
-                blocker.rect.x = 45 + (300 * number) + (column * blocker.size)
-                blocker.rect.y = 400 + (row * blocker.size)
+                blocker.rect.x = BLOCK_START_X + (BLOCK_SPACING_X * number) + (column * blocker.size)
+                blocker.rect.y = BLOCK_START_Y + (row * blocker.size)
                 aux.add(blocker)
         return aux
 
@@ -591,7 +678,7 @@ class SpaceInvaders():
             self.enemy_shot()
         
         if ((len(self.mystery) == 0)):
-            self.mystery.add(Mystery(self.mystery_image, self.random_position(), 15))
+            self.mystery.add(Mystery(self.mystery_image, Mystery.random_position(), 15))
 
         self.window.blit(self.background, [0, 0])
         self.window.blit(score, (SCREEN_WIDTH - 150, SCREEN_HEIGHT - 30))
@@ -690,8 +777,6 @@ class SpaceInvaders():
                 enemy.up_speed()
             enemy.down_invader()
 
-    def create_font(self, size):
-        return pygame.font.Font(FONT, size)
 
     def can_shoot(self, event):
         """
@@ -746,54 +831,7 @@ class SpaceInvaders():
         icon = self.play_icon if self.paused else self.pause_icon
         self.window.blit(icon, self.pause_button_rect)
 
-
-    def instructions_screen(self):
-        """
-        Exibe a janela de instruções com as teclas do jogo.
-        Aparece só na primeira partida e fecha ao clicar no botão CLOSE
-        ou ao apertar ENTER. O jogo não começa enquanto ela está aberta.
-        """
-        title_font = self.create_font(50)
-        text_font = self.create_font(20)
-        lines = ["ARROWS : MOVE", "SPACE OR UP : SHOOT", "P : PAUSE", "ESC : QUIT"]
-
-        panel = pygame.Rect(0, 0, 560, 380)
-        panel.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-        button = pygame.Rect(0, 0, 240, 50)
-        button.center = (SCREEN_WIDTH // 2, panel.bottom - 50)
-
-        title = title_font.render("HOW TO PLAY", True, GOLD)
-        button_text = text_font.render("CLOSE : ENTER", True, GREEN)
-
-        opened = True
-        while opened:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    opened = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if button.collidepoint(event.pos):
-                        opened = False
-
-            self.window.blit(self.background, [0, 0])
-            pygame.draw.rect(self.window, BLACK, panel)
-            pygame.draw.rect(self.window, WHITE, panel, 3)
-            self.window.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, panel.top + 55)))
-
-            y = panel.top + 130
-            for line in lines:
-                text = text_font.render(line, True, WHITE)
-                self.window.blit(text, text.get_rect(center=(SCREEN_WIDTH // 2, y)))
-                y += 45
-
-            pygame.draw.rect(self.window, GREEN, button, 3)
-            self.window.blit(button_text, button_text.get_rect(center=button.center))
-            self.clock.tick(60)
-            pygame.display.update()
-
-        self.instructions_shown = True
+      
 
     def main(self):
         """
