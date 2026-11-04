@@ -314,6 +314,14 @@ class SpaceInvaders():
         self.explosion_image = pygame.transform.scale(explosion_image, (
                                     (SCREEN_WIDTH // 20), (SCREEN_WIDTH // 20)))
         self.clock = pygame.time.Clock()
+        # Pausa (SM-13)
+        self.paused = False
+        self.pause_start = 0
+        self.pause_font = self.create_font(60)
+        self.pause_icon = pygame.image.load(DIRECTORY + "/images/pause.png")
+        self.play_icon = pygame.image.load(DIRECTORY + "/images/play.png")
+        self.pause_button_rect = self.pause_icon.get_rect(
+            topleft=(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 34))
         self.invaders = pygame.sprite.OrderedUpdates()
         self.invaders_direction = 1
         self.increment_speed = False
@@ -323,6 +331,9 @@ class SpaceInvaders():
         self.bottom_edge = pygame.sprite.GroupSingle(Edge(SCREEN_WIDTH, 5, 0, 560))
         self.groups = pygame.sprite.Group(self.ship_shot, self.invader_shot, 
                                     self.invaders, self.mystery)
+        
+         # Janela de instruções (SM-15)
+        self.instructions_shown = False
 
     def random_position(self):
         """
@@ -368,7 +379,12 @@ class SpaceInvaders():
             rect_mystery.y += speed[1]
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                # Refatoração aplicada: Consolidate Conditional Expression.
+                # Fechar a janela e apertar ESC levam ao mesmo resultado, então
+                # os dois testes foram unidos em uma só condição.
+                wants_to_quit = (event.type == pygame.QUIT or
+                                 (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE))
+                if wants_to_quit:
                     music_menu.stop()
                     return False
 
@@ -377,10 +393,6 @@ class SpaceInvaders():
                         self.start_game()
                         music_menu.stop()
                         return True
-
-                    if event.key == pygame.K_ESCAPE:
-                        music_menu.stop()
-                        return False
 
             self.window.fill(BLACK)
             self.window.blit(mystery, rect_mystery)
@@ -437,7 +449,36 @@ class SpaceInvaders():
                         music_menu.stop()
                         pygame.quit()
                         exit()
-        
+
+    def show_message_screen(self, message, color, duration_ms, x_offset):
+        """
+        Exibe uma mensagem centralizada na tela por um tempo determinado.
+
+        Refatoração aplicada: Extract Method. O laço de exibição era idêntico
+        em level_screen e game_over_screen (mudavam só o texto, a cor, a
+        duração e a posição) e foi extraído para este método. Qualquer
+        ajuste nessas telas deve ser feito aqui, em um só lugar.
+
+        Parâmetros:
+            message: texto exibido.
+            color: cor do texto.
+            duration_ms: duração da tela, em milissegundos.
+            x_offset: valor usado para centralizar o texto na horizontal.
+        """
+        font = self.create_font(100)
+        text = font.render(message, True, color)
+        start = pygame.time.get_ticks()
+
+        while ((pygame.time.get_ticks() - start) < duration_ms):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            self.window.blit(self.background, [0, 0])
+            self.window.blit(text, [(SCREEN_WIDTH - x_offset) // 2, 220])
+            pygame.display.update()
+
     def level_screen(self):
         """
         Cria a tela que indica o nível que irá iniciar.
@@ -448,40 +489,18 @@ class SpaceInvaders():
             self.speed += 0.3
         elif (self.level == 1):
             self.speed += 1
-        
-        font = self.create_font(100)
-        text = font.render('LEVEL: ' + str(self.level), True, GOLD)
+
+        # self.time marca o início do nível e é usado em update_direction.
         self.time = pygame.time.get_ticks()
+        self.show_message_screen('LEVEL: ' + str(self.level), GOLD, 1000, 450)
 
-        while ((pygame.time.get_ticks() - self.time) < 1000):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-
-            self.window.blit(self.background, [0, 0])
-            self.window.blit(text, [(SCREEN_WIDTH - 450) // 2, 220])
-            pygame.display.update()
-    
     def game_over_screen(self):
         """
         Cria a tela de game over.
         Ela dura 1.5 segundo (1500 milisegundos).
         """
-        font = self.create_font(100)
-        text = font.render('GAME OVER', True, RED)
-        time = pygame.time.get_ticks()
-
-        while ((pygame.time.get_ticks() - time) < 1500):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-
-            self.window.blit(self.background, [0, 0])
-            self.window.blit(text, [(SCREEN_WIDTH - 600) // 2, 220])
-            pygame.display.update()
-
+        self.show_message_screen('GAME OVER', RED, 1500, 600)
+        
     def start_game(self):
         """
         Limpa todas as variáveis para que se possa iniciar o jogo.
@@ -495,6 +514,8 @@ class SpaceInvaders():
         self.mystery.empty()
         self.invader_shot.empty()
         self.ship_shot.empty()
+        if not self.instructions_shown:
+            self.instructions_screen()
         self.level_screen()
         self.create_invaders()
         self.ship_sprite.initial_position()
@@ -581,6 +602,7 @@ class SpaceInvaders():
         self.update_direction()
         self.check_collisions()
         self.showShipLives()
+        self.draw_pause_button()
 
         self.groups = pygame.sprite.Group(self.ship, self.ship_shot, self.invader_shot, self.invaders, 
                                     self.left_edge, self.bottom_edge, self.right_edge, self.mystery)
@@ -646,12 +668,16 @@ class SpaceInvaders():
         arr = self.invaders.sprites()
         first = arr[0]
         last = arr[-1]
-        
-        if ((last.rect.x > (SCREEN_WIDTH - last.rect.width - 10)) or (first.rect.x < 10)):
-            self.invaders_direction *= -1
-            current_time = pygame.time.get_ticks()
-            if (current_time - self.time > (8000 // self.speed)):
-                self.down_invader(arr)
+
+        # Refatoração aplicada: Replace Nested Conditional with Guard Clauses.
+        # Cláusula de guarda: se nenhum invasor chegou à borda, não há nada a fazer.
+        if not ((last.rect.x > (SCREEN_WIDTH - last.rect.width - 10)) or (first.rect.x < 10)):
+            return
+
+        self.invaders_direction *= -1
+        current_time = pygame.time.get_ticks()
+        if (current_time - self.time > (8000 // self.speed)):
+            self.down_invader(arr)
     
     def down_invader(self, arr):
         """
@@ -666,6 +692,108 @@ class SpaceInvaders():
 
     def create_font(self, size):
         return pygame.font.Font(FONT, size)
+
+    def can_shoot(self, event):
+        """
+        Indica se a nave pode atirar: o jogador apertou uma tecla de disparo
+        (seta para cima ou espaço) e não há outro tiro da nave na tela.
+
+        Refatoração aplicada: Decompose Conditional. A condição que ficava
+        em uma linha só dentro de main foi extraída para este método, para
+        que a regra de disparo tenha um nome e um lugar próprio.
+        """
+        pressed_shoot_key = event.key == pygame.K_UP or event.key == pygame.K_SPACE
+        return pressed_shoot_key and not self.ship_shot
+
+    def fire_ship_shot(self):
+        """
+        Cria o disparo da nave e o adiciona ao grupo de tiros.
+        """
+        self.ship_shot.add(self.ship_sprite.shoot())
+
+    def toggle_pause(self):
+        """
+        Pausa ou retoma o jogo. Ao pausar, guarda o instante da pausa e
+        exibe o aviso PAUSED. Ao retomar, soma o tempo parado a self.time,
+        para que o controle de descida dos invasores (update_direction)
+        não conte o tempo em que o jogo ficou parado.
+        """
+        if self.paused:
+            self.time += pygame.time.get_ticks() - self.pause_start
+            self.paused = False
+        else:
+            self.pause_start = pygame.time.get_ticks()
+            self.paused = True
+            self.show_paused_message()
+        self.draw_pause_button()
+        pygame.display.update()
+
+    def show_paused_message(self):
+        """
+        Desenha o aviso PAUSED no centro da tela, sobre a última imagem do jogo.
+        """
+        text = self.pause_font.render("PAUSED", True, GOLD)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        self.window.blit(text, text_rect)
+
+
+    def draw_pause_button(self):
+        """
+        Desenha o ícone de pausa (ou de continuar, se o jogo está pausado).
+        Antes, restaura o fundo na área do ícone para não sobrepor o desenho anterior.
+        """
+        self.window.blit(self.background, self.pause_button_rect, self.pause_button_rect)
+        icon = self.play_icon if self.paused else self.pause_icon
+        self.window.blit(icon, self.pause_button_rect)
+
+
+    def instructions_screen(self):
+        """
+        Exibe a janela de instruções com as teclas do jogo.
+        Aparece só na primeira partida e fecha ao clicar no botão CLOSE
+        ou ao apertar ENTER. O jogo não começa enquanto ela está aberta.
+        """
+        title_font = self.create_font(50)
+        text_font = self.create_font(20)
+        lines = ["ARROWS : MOVE", "SPACE OR UP : SHOOT", "P : PAUSE", "ESC : QUIT"]
+
+        panel = pygame.Rect(0, 0, 560, 380)
+        panel.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        button = pygame.Rect(0, 0, 240, 50)
+        button.center = (SCREEN_WIDTH // 2, panel.bottom - 50)
+
+        title = title_font.render("HOW TO PLAY", True, GOLD)
+        button_text = text_font.render("CLOSE : ENTER", True, GREEN)
+
+        opened = True
+        while opened:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    opened = False
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if button.collidepoint(event.pos):
+                        opened = False
+
+            self.window.blit(self.background, [0, 0])
+            pygame.draw.rect(self.window, BLACK, panel)
+            pygame.draw.rect(self.window, WHITE, panel, 3)
+            self.window.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, panel.top + 55)))
+
+            y = panel.top + 130
+            for line in lines:
+                text = text_font.render(line, True, WHITE)
+                self.window.blit(text, text.get_rect(center=(SCREEN_WIDTH // 2, y)))
+                y += 45
+
+            pygame.draw.rect(self.window, GREEN, button, 3)
+            self.window.blit(button_text, button_text.get_rect(center=button.center))
+            self.clock.tick(60)
+            pygame.display.update()
+
+        self.instructions_shown = True
 
     def main(self):
         """
@@ -698,12 +826,18 @@ class SpaceInvaders():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_ESCAPE:
                                 run, menu = False, False
-                            if ((event.key == pygame.K_UP or event.key == pygame.K_SPACE) and not self.ship_shot):
-                                self.ship_shot.add(self.ship_sprite.shoot())
+                            if event.key == pygame.K_p:
+                                self.toggle_pause()
+                            if self.can_shoot(event) and not self.paused:
+                                self.fire_ship_shot()
+                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                            if self.pause_button_rect.collidepoint(event.pos):
+                                self.toggle_pause()
 
-                    self.update()
-
-
+                    if self.paused:
+                        self.clock.tick(60)
+                    else:
+                        self.update()
 
 
 if __name__ == "__main__":
