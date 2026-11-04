@@ -10,7 +10,7 @@ Sendo originalmente lançado em 1978 pela [TAITO CORPORATION](https://www.taito.
 
 O objetivo do jogo é destruir os aliens com a sua nave e dessa forma impedir que a invasão se concretize. Porém, não se pode dormir na direção, já que a qualquer momento os aliens podem te atingir e conseguir o que tanto querem: conquistar a Terra 🌎!
 
-![Tela de Jogo](images/telainicial.gif)
+![Tela de Jogo](assets/images/telainicial.gif)
 
 ## Tópicos
 
@@ -125,16 +125,34 @@ py -3.12 spaceinvaders.py
 
 Após a execução do comando, a janela do jogo deverá ser aberta.
 
-Os recursos utilizados pelo jogo estão organizados dentro da pasta `assets`, separados de acordo com seu tipo:
+### Estrutura do projeto
+
+O projeto está organizado em módulos para separar as configurações, os elementos visuais e o controle do jogo. Os recursos gráficos, sonoros e a fonte ficam na pasta `assets`.
 
 ```text
-assets/
-├── fonts/
-├── images/
-└── sounds/
+MS16SW-SpaceInvaders/
+├── assets/
+│   ├── fonts/
+│   ├── images/
+│   └── sounds/
+├── src/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── sprites.py
+│   └── game.py
+├── spaceinvaders.py
+└── README.md
 ```
 
-A pasta images contém os elementos gráficos utilizados no jogo, sounds contém os arquivos de áudio e fonts contém as fontes utilizadas na interface.
+- `src/settings.py`: reúne dimensões da janela, cores e caminhos dos recursos.
+- `src/sprites.py`: contém as classes dos elementos do jogo, como nave, invasores, projéteis e barreiras.
+- `src/game.py`: contém a classe principal `SpaceInvaders` e o fluxo do jogo.
+- `spaceinvaders.py`: inicializa o Pygame e executa o jogo.
+- `assets/images/`: contém as imagens usadas na interface e durante as partidas.
+- `assets/sounds/`: contém os efeitos sonoros e a música.
+- `assets/fonts/`: contém a fonte pixelada usada nas telas do jogo.
+
+Os caminhos dos recursos são resolvidos a partir da localização do projeto, portanto o jogo pode ser iniciado de outra pasta sem perder acesso às imagens, aos sons ou à fonte.
 
 ### Detalhes da Construção do Jogo
 
