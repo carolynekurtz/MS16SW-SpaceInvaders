@@ -14,6 +14,7 @@ from .settings import (
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     WHITE,
+    TEAL
 )
 from .sprites import Block, Edge, Invader, Mystery, Ship
 
@@ -333,7 +334,7 @@ class SpaceInvaders():
         aux = pygame.sprite.Group()
         for row in range(4):
             for column in range(10):
-                blocker = Block()
+                blocker = Block(color=TEAL)
                 blocker.rect.x = 45 + (300 * number) + (column * blocker.size)
                 blocker.rect.y = 400 + (row * blocker.size)
                 aux.add(blocker)
