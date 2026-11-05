@@ -217,10 +217,18 @@ class SpaceInvaders():
         text2 = self.font20.render("PRESS ENTER TO TRY AGAIN", False, WHITE)
         text3 = self.font20.render("PRESS ESC TO OUT", False, WHITE)
 
-        text1_rect = text1.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 350))
-        text2_rect = text2.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100))
-        text3_rect = text3.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 40))
+        screen_center_x = SCREEN_WIDTH // 2
 
+        text1_rect = text1.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 350)
+        )
+        text2_rect = text2.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 100)
+        )
+        text3_rect = text3.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 40)
+        )
+        
         self.window.fill(BLACK)
         self.window.blit(text1, text1_rect)
         self.window.blit(text2, text2_rect)
