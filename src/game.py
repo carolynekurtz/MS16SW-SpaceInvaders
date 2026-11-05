@@ -343,11 +343,13 @@ class SpaceInvaders():
         """
         Cria os invasores e coloca todos em um grupo.
         """
-        enemy_types = []
 
-        for i in range(1, 8):
-            enemy_types.append(pygame.image.load(DIRECTORY + ("/assets/images/invader%d.png" % (i % 2))))
-
+        enemy_types = [
+            pygame.image.load(
+                DIRECTORY + ("/assets/images/invader%d.png" % (i % 2))
+            )
+            for i in range(1, 8)
+        ]
         x = 25
 
         # Preenchendo os invasores pelas colunas.
