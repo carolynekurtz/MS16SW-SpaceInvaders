@@ -12,7 +12,7 @@ FONTS_DIR = ASSETS_DIR / "fonts"
 
 # Compatibilidade simples para os módulos que montam caminhos de recursos.
 DIRECTORY = str(PROJECT_ROOT)
-FONT = str(FONTS_DIR / "space_invaders.ttf")
+FONT = str(FONTS_DIR / "oxanium-semibold.ttf")
 
 # Dimensões da janela.
 SCREEN_WIDTH = 800
