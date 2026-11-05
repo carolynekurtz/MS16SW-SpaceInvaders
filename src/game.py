@@ -49,7 +49,6 @@ class SpaceInvaders():
         Criando um objeto do tipo pygame.font.Font, onde Ã© passada a fonte e o tamanho
         se a fonte for passada como None Ã© utilizada a padrÃ£o do sistema.
         '''
-        self.font = self.create_font(60)
         self.score_font = self.create_font(15)
         self.explosion_sound = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/invaderkilled.wav")
 
