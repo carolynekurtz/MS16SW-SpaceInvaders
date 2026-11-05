@@ -493,11 +493,10 @@ class SpaceInvaders():
         """
         Movimenta cada invasor pelo eixo y.
         """
-        up_speed = (len(self.invaders) <= 8)
-
         for enemy in arr:
-            if up_speed:
+            if len(self.invaders) <= 8:
                 enemy.up_speed()
+
             enemy.down_invader()
 
     def create_font(self, size):
