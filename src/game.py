@@ -49,7 +49,6 @@ class SpaceInvaders():
         Criando um objeto do tipo pygame.font.Font, onde Ã© passada a fonte e o tamanho
         se a fonte for passada como None Ã© utilizada a padrÃ£o do sistema.
         '''
-        self.font = self.create_font(60)
         self.score_font = self.create_font(15)
         self.explosion_sound = pygame.mixer.Sound(DIRECTORY + "/assets/sounds/invaderkilled.wav")
 
@@ -218,10 +217,18 @@ class SpaceInvaders():
         text2 = self.font20.render("PRESS ENTER TO TRY AGAIN", False, WHITE)
         text3 = self.font20.render("PRESS ESC TO OUT", False, WHITE)
 
-        text1_rect = text1.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 350))
-        text2_rect = text2.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100))
-        text3_rect = text3.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 40))
+        screen_center_x = SCREEN_WIDTH // 2
 
+        text1_rect = text1.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 350)
+        )
+        text2_rect = text2.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 100)
+        )
+        text3_rect = text3.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 40)
+        )
+        
         self.window.fill(BLACK)
         self.window.blit(text1, text1_rect)
         self.window.blit(text2, text2_rect)
@@ -344,11 +351,13 @@ class SpaceInvaders():
         """
         Cria os invasores e coloca todos em um grupo.
         """
-        enemy_types = []
 
-        for i in range(1, 8):
-            enemy_types.append(pygame.image.load(DIRECTORY + ("/assets/images/invader%d.png" % (i % 2))))
-
+        enemy_types = [
+            pygame.image.load(
+                DIRECTORY + ("/assets/images/invader%d.png" % (i % 2))
+            )
+            for i in range(1, 8)
+        ]
         x = 25
 
         # Preenchendo os invasores pelas colunas.
@@ -484,11 +493,10 @@ class SpaceInvaders():
         """
         Movimenta cada invasor pelo eixo y.
         """
-        up_speed = (len(self.invaders) <= 8)
-
         for enemy in arr:
-            if up_speed:
+            if len(self.invaders) <= 8:
                 enemy.up_speed()
+
             enemy.down_invader()
 
     def create_font(self, size):
