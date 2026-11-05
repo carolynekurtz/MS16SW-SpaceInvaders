@@ -191,7 +191,7 @@ Para a construção deste projeto foi necessário criar diversas classes com o o
 
 ### Comandos
 
-Para realizar comandos no jogo é necessário apenas o uso teclado e a sua listagem está abaixo:
+Para realizar comandos no jogo, é necessário apenas o uso do teclado. A listagem está abaixo:
 
 <table style="text-align:center">
   <tr>
@@ -199,22 +199,28 @@ Para realizar comandos no jogo é necessário apenas o uso teclado e a sua lista
     <td><code>ENTER</code> ou <code>SPACE</code></td>
   </tr>
   <tr>
-    <td>Fechar ou Encerrar</td>
-    <td><code>ESC</code> ou clicar no ❌ da janela.</td>
-  </tr>
-  <tr>
     <td>Movimentar a nave</td>
-    <td>Setas direcionais (⬅ ou ➡)</td>
+    <td>Setas direcionais (<code>←</code> ou <code>→</code>)</td>
   </tr>
   <tr>
     <td>Realizar disparo</td>
-    <td>Seta direcional (⬆) ou <code>SPACE</code></td>
+    <td>Seta direcional (<code>↑</code>) ou <code>SPACE</code></td>
+  </tr>
+  <tr>
+    <td>Pausar ou retomar o jogo</td>
+    <td><code>P</code> ou botão de pausa na tela</td>
   </tr>
   <tr>
     <td>Reiniciar o jogo (na tela de Game Over)</td>
     <td><code>ENTER</code></td>
   </tr>
+  <tr>
+    <td>Fechar ou encerrar o jogo</td>
+    <td><code>ESC</code> ou clicar no botão de fechar da janela</td>
+  </tr>
 </table>
+
+Na primeira partida, uma tela de instruções apresenta os principais comandos. Para fechá-la, pressione <code>ENTER</code> ou clique em <code>CLOSE</code>.
 
 ### Solução de problemas
 
