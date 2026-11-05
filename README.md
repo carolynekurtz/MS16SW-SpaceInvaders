@@ -269,7 +269,7 @@ Integrantes:
 
 - Carolyne Kurtz
 - Leonardo Paniz
-- Samuel Vithor Oliveira Martins 
+- Samuel Vithor Oliveira Martins
 - Vitoria Seibt
 
 ### Autores
