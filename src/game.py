@@ -1,6 +1,8 @@
 ﻿"""Controle principal e regras do jogo Space Invaders."""
 
 from random import choice, randint
+import json
+from pathlib import Path
 
 import pygame
 
@@ -43,8 +45,12 @@ class SpaceInvaders():
         logo = pygame.image.load(DIRECTORY + "/assets/images/logo.png")
         pygame.display.set_icon(logo)
         self.score = 0
+        self.highscore_file = Path(DIRECTORY) / "highscore.json"
+        self.highscore = self.load_highscore()
+        self.new_highscore = False
+
         self.level = 0
-        self.speed = 0
+        self.speed = 0  
         '''
         Criando um objeto do tipo pygame.font.Font, onde Ã© passada a fonte e o tamanho
         se a fonte for passada como None Ã© utilizada a padrÃ£o do sistema.
@@ -91,6 +97,46 @@ class SpaceInvaders():
 
          # Janela de instruÃ§Ãµes (SM-15)
         self.instructions_shown = False
+
+
+    def load_highscore(self):
+        """
+        Carrega o maior recorde salvo no arquivo JSON.
+        Se o arquivo não existir ou estiver inválido, retorna zero.
+        """
+        try:
+            with open(self.highscore_file, "r", encoding="utf-8") as file:
+                data = json.load(file)
+
+            highscore = data.get("highscore", 0)
+
+            if isinstance(highscore, int) and highscore >= 0:
+                return highscore
+
+            return 0
+
+        except (FileNotFoundError, json.JSONDecodeError, OSError, AttributeError):
+            return 0
+
+    def save_highscore(self):
+        """
+        Salva o maior recorde no arquivo JSON.
+        """
+        try:
+            with open(self.highscore_file, "w", encoding="utf-8") as file:
+                json.dump({"highscore": self.highscore}, file, indent=4)
+
+        except OSError:
+            print("Não foi possível salvar o recorde.")
+
+    def update_highscore(self):
+        """
+        Atualiza o recorde quando a pontuação atual é maior.
+        """
+        if self.score > self.highscore:
+            self.highscore = self.score
+            self.new_highscore = True
+            self.save_highscore()
 
     def random_position(self):
         """
@@ -160,6 +206,13 @@ class SpaceInvaders():
         )
         subtitle_rect = subtitle.get_rect(center=(SCREEN_WIDTH // 2, 350))
 
+        highscore_menu = menu_font.render(
+            "HI-SCORE: %d" % self.highscore, False, GOLD
+        )
+        highscore_menu_rect = highscore_menu.get_rect(
+            center=(SCREEN_WIDTH // 2, 375)
+        )
+
         while menu:
             if (rect_mystery.left < 0 or
                     rect_mystery.right > SCREEN_WIDTH):
@@ -191,6 +244,7 @@ class SpaceInvaders():
             self.window.blit(logo, logo_rect)
             self.window.blit(mystery, rect_mystery)
             self.window.blit(subtitle, subtitle_rect)
+            self.window.blit(highscore_menu, highscore_menu_rect)
 
             draw_menu_button(
                 start_rect, "ENTER / SPACE  START", (70, 225, 255)
@@ -214,16 +268,40 @@ class SpaceInvaders():
         self.font20 = self.create_font(20)
 
         text1 = self.font50.render("FINAL SCORE: %d" % self.score, False, GOLD)
+        text_highscore = self.font20.render(
+            "HI-SCORE: %d" % self.highscore, False, GOLD
+        )
         text2 = self.font20.render("PRESS ENTER TO TRY AGAIN", False, WHITE)
         text3 = self.font20.render("PRESS ESC TO OUT", False, WHITE)
+
+        if self.new_highscore:
+            text_new_record = self.font20.render(
+                "NEW HIGH SCORE!", False, GREEN
+        )
 
         screen_center_x = SCREEN_WIDTH // 2
 
         text1_rect = text1.get_rect(
             center=(screen_center_x, SCREEN_HEIGHT - 350)
         )
+        text_highscore_rect = text_highscore.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 280)
+        )
+
+        if self.new_highscore:
+            text_new_record_rect = text_new_record.get_rect(
+                center=(screen_center_x, SCREEN_HEIGHT - 220)
+            )
         text2_rect = text2.get_rect(
             center=(screen_center_x, SCREEN_HEIGHT - 100)
+        )
+        text_highscore_rect = text_highscore.get_rect(
+            center=(screen_center_x, SCREEN_HEIGHT - 280)
+        )
+
+        if self.new_highscore:
+            text_new_record_rect = text_new_record.get_rect(
+                center=(screen_center_x, SCREEN_HEIGHT - 220)
         )
         text3_rect = text3.get_rect(
             center=(screen_center_x, SCREEN_HEIGHT - 40)
@@ -231,6 +309,11 @@ class SpaceInvaders():
         
         self.window.fill(BLACK)
         self.window.blit(text1, text1_rect)
+        self.window.blit(text_highscore, text_highscore_rect)
+
+        if self.new_highscore:
+            self.window.blit(text_new_record, text_new_record_rect)
+
         self.window.blit(text2, text2_rect)
         self.window.blit(text3, text3_rect)
         pygame.display.update()
@@ -245,6 +328,8 @@ class SpaceInvaders():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         music_menu.stop()
+                        self.score = 0
+                        self.new_highscore = False
                         self.level = 0
                         self.speed = 0
                         self.ship = pygame.sprite.GroupSingle(
@@ -405,6 +490,10 @@ class SpaceInvaders():
 
         self.window.blit(self.background, [0, 0])
         self.window.blit(score, (SCREEN_WIDTH - 150, SCREEN_HEIGHT - 30))
+
+        highscore = self.score_font.render("HI-SCORE: %d" % self.highscore, False, GOLD)
+        self.window.blit(highscore, (SCREEN_WIDTH - 180, SCREEN_HEIGHT - 55))
+
         self.groups.draw(self.window)
         self.blocks.draw(self.window)
 
@@ -467,6 +556,8 @@ class SpaceInvaders():
             self.explosion_sound.play()
             self.window.blit(self.explosion_image, (self.ship_sprite.rect.x, self.ship_sprite.rect.y))
             self.ship_sprite.die()
+        
+        self.update_highscore()
 
     def update_direction(self):
         """

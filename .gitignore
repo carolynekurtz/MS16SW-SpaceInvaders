@@ -1,2 +1,5 @@
 __pycache__/
 *.py[cod]
+
+# Recorde persistente do jogo
+highscore.json
